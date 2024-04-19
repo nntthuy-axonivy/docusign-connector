@@ -1,6 +1,5 @@
 package com.axonivy.connector.docusign.event;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +14,7 @@ import com.docusign.esign.model.EnvelopesInformation;
 import ch.ivyteam.ivy.environment.Ivy;
 import ch.ivyteam.ivy.persistence.PersistencyException;
 import ch.ivyteam.ivy.process.intermediateevent.AbstractProcessIntermediateEventBean;
+import ch.ivyteam.ivy.scripting.objects.Duration;
 import ch.ivyteam.ivy.service.ServiceException;
 import ch.ivyteam.ivy.workflow.ITask;
 import ch.ivyteam.ivy.workflow.TaskState;
@@ -26,13 +26,14 @@ public class EnvelopeCompleted extends AbstractProcessIntermediateEventBean {
   public static UUID DOCU_SIGN_CLIENT_ID = UUID.fromString("3d3d7114-4397-48c9-8378-931fc35885c3");
 
   public EnvelopeCompleted() {
-    super("WaitForEnvelope", "Waits until envelopes are completed (signed by all participants)", String.class);
+    super("WaitForEnvelope", "Waits until envelopes are completed (signed by all participants)",
+            String.class);
   }
 
   @Override
   public void start(IProgressMonitor monitor) throws ServiceException {
     super.start(monitor);
-    getEventBeanRuntime().poll().every(Duration.ofSeconds(30));
+    getEventBeanRuntime().poll().every(new Duration(30));
   }
 
   @Override

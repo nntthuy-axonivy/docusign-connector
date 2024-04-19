@@ -1,0 +1,476 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/process/11.2.2/process.json",
+  "id" : "18E7EAE1F6E4F5CF",
+  "kind" : "HTML_DIALOG",
+  "config" : {
+    "data" : "com.axonivy.connector.docusign.connector.demo.EmbeddedAndRemoteSigning.EmbeddedAndRemoteSigningData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "HtmlDialogStart",
+      "name" : "start()",
+      "config" : {
+        "signature" : "start",
+        "guid" : "18E7EAE1F6EF622F"
+      },
+      "visual" : {
+        "at" : { "x" : 80, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f7", "to" : "f6" }
+      ]
+    }, {
+      "id" : "f1",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 512, "y" : 64 }
+      }
+    }, {
+      "id" : "f3",
+      "type" : "HtmlDialogEventStart",
+      "name" : "close",
+      "config" : {
+        "guid" : "18E7EAE1F6FA52D9"
+      },
+      "visual" : {
+        "at" : { "x" : 80, "y" : 512 }
+      },
+      "connect" : [
+        { "id" : "f5", "to" : "f4" }
+      ]
+    }, {
+      "id" : "f4",
+      "type" : "HtmlDialogExit",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 512 }
+      }
+    }, {
+      "id" : "f6",
+      "type" : "Script",
+      "name" : "Init",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import org.apache.commons.lang3.StringUtils;",
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "import ch.ivyteam.ivy.workflow.document.IDocument;",
+            "import com.docusign.esign.model.SignHere;",
+            "import com.axonivy.connector.docusign.util.SignUtils;",
+            "in.signHere = new SignHere();",
+            "in.signer = SignUtils.getSessionUserAsFirstSigner(ivy.session);",
+            "in.attachmentName = StringUtils.EMPTY;",
+            "for (IDocument doc : ivy.case.documents().getAll()) {",
+            "  if (doc.getName().startsWith(DocuSignConstants.UPLOADED_PREFIX)) {",
+            "    in.file = doc.read().asIvyFile();",
+            "    in.attachmentName =  in.attachmentName + DocuSignConstants.SEMICOLON + doc.getName();",
+            "  }",
+            "}",
+            "in.isSignCompleted = SignUtils.isSigningCompleted(ivy.task);"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 216, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f9", "to" : "f8" }
+      ]
+    }, {
+      "id" : "f8",
+      "type" : "Alternative",
+      "name" : "is sign completed?",
+      "config" : {
+        "conditions" : {
+          "f40" : "in.isSignCompleted"
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 368, "y" : 64 },
+        "labelOffset" : { "x" : 16, "y" : -24 }
+      },
+      "connect" : [
+        { "id" : "f40", "to" : "f10", "label" : {
+            "name" : "yes"
+          } },
+        { "id" : "f11", "to" : "f1", "label" : {
+            "name" : "no"
+          } }
+      ]
+    }, {
+      "id" : "f10",
+      "type" : "Script",
+      "name" : "Update Envelope ID to case",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.docusign.esign.model.SignHere;",
+            "import com.docusign.esign.model.Signer;",
+            "import com.axonivy.connector.docusign.connector.demo.constant.DemoConstant;",
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "in.envelopeId = ivy.case.customFields().stringField(DocuSignConstants.ENVELOPE_ID).getOrNull();",
+            "",
+            "// Restores user input",
+            "String signerId = ivy.task.customFields().stringField(DemoConstant.SIGNER_ID).getOrNull();",
+            "String signHereId = ivy.task.customFields().stringField(DemoConstant.SIGN_HERE_ID).getOrNull();",
+            "in.signer = ivy.repo.find(signerId, Signer.class) as Signer;",
+            "in.signHere = ivy.repo.find(signHereId, SignHere.class) as SignHere;"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 368, "y" : 160 }
+      },
+      "connect" : [
+        { "id" : "f15", "to" : "f13" }
+      ]
+    }, {
+      "id" : "f12",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "downloadSignedDocs()",
+      "config" : {
+        "signature" : "downloadSignedDocs",
+        "input" : {
+          "map" : {
+            "out.isSignCompleted" : "true"
+          }
+        },
+        "guid" : "18E7EB0A1D4E82E9"
+      },
+      "visual" : {
+        "at" : { "x" : 80, "y" : 272 }
+      },
+      "connect" : [
+        { "id" : "f37", "to" : "f34" }
+      ]
+    }, {
+      "id" : "f13",
+      "type" : "SubProcessCall",
+      "name" : "Read Envelope docs",
+      "config" : {
+        "processCall" : "Processes/Envelopes:readDocuments(String)",
+        "call" : {
+          "map" : {
+            "param.envelopeId" : "in.envelopeId"
+          }
+        },
+        "output" : {
+          "map" : {
+            "out" : "in",
+            "out.documents" : "result.documents"
+          }
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 368, "y" : 272 },
+        "icon" : "res:/webContent/icons/docusign.png"
+      },
+      "connect" : [
+        { "id" : "f19", "to" : "f18" }
+      ]
+    }, {
+      "id" : "f16",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 784, "y" : 272 }
+      }
+    }, {
+      "id" : "f18",
+      "type" : "Script",
+      "name" : "Add signed doc to case",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import org.apache.commons.lang3.StringUtils;",
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "import com.axonivy.connector.docusign.bo.DownloadResult;",
+            "import com.axonivy.connector.docusign.service.DocuSignService;",
+            "import com.docusign.esign.model.EnvelopeDocument;",
+            "for (EnvelopeDocument doc : in.documents) {",
+            "  if (doc.type.equals(DocuSignConstants.TYPE_AS_CONTENT)) {",
+            "    DownloadResult result = DocuSignService.getSignedDocContentStream(in.envelopeId, doc.documentId);",
+            "    if (result != null) {",
+            "      String document = org.apache.commons.io.FilenameUtils.removeExtension(doc.name);",
+            "      document = document.startsWith(DocuSignConstants.UPLOADED_PREFIX) ? document.replaceAll(DocuSignConstants.UPLOADED_PREFIX, StringUtils.EMPTY) : document;",
+            "      document = document + DocuSignConstants.SIGNED_SUFFIX + DocuSignConstants.PDF_EXTENSION;",
+            "      try {",
+            "        ivy.case.documents().add(document).write().withContentFrom(result.file);",
+            "      }  catch (Exception e) {",
+            "        // nothing to insert into Document",
+            "      }",
+            "    }",
+            "  }",
+            "}"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 512, "y" : 272 }
+      },
+      "connect" : [
+        { "id" : "f21", "to" : "f20" }
+      ]
+    }, {
+      "id" : "f20",
+      "type" : "Script",
+      "name" : "Update table documents",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "import ch.ivyteam.ivy.workflow.document.IDocument;",
+            "for (IDocument doc : ivy.case.documents().getAll()) {",
+            "  if (!doc.getName().startsWith(DocuSignConstants.UPLOADED_PREFIX)) {",
+            "    in.signedIvyDocs.add(doc);",
+            "  }",
+            "}"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 656, "y" : 272 }
+      },
+      "connect" : [
+        { "id" : "f17", "to" : "f16" }
+      ]
+    }, {
+      "id" : "f22",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "createEnvelopeAndRecipientView(Boolean)",
+      "config" : {
+        "signature" : "createEnvelopeAndRecipientView",
+        "input" : {
+          "params" : [
+            { "name" : "isRemoteSigning", "type" : "Boolean", "desc" : "" }
+          ],
+          "map" : {
+            "out.isRemoteSigning" : "param.isRemoteSigning"
+          }
+        },
+        "guid" : "18E7EBBFD1EA1EB0"
+      },
+      "visual" : {
+        "at" : { "x" : 80, "y" : 400 }
+      },
+      "connect" : [
+        { "id" : "f26", "to" : "f25" }
+      ]
+    }, {
+      "id" : "f23",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 784, "y" : 400 }
+      }
+    }, {
+      "id" : "f25",
+      "type" : "Script",
+      "name" : "Create EnvelopeDefinition",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "import com.axonivy.connector.docusign.util.EnvelopeDefinitionUtils;",
+            "in.envelopeDefinition = EnvelopeDefinitionUtils.createSimpleEnvelopeDefinition(ivy.cms.co(\"/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/MailSubject\"), in.file, in.signer, in.signHere);",
+            "// We make a demo for one signer, so always get the first signer",
+            "in.signer = in.envelopeDefinition.recipients.signers.get(0);",
+            "if (in.isRemoteSigning) {",
+            "  ivy.task.customFields().stringField(DocuSignConstants.HIDE).set(DocuSignConstants.HIDE);",
+            "}"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 216, "y" : 400 }
+      },
+      "connect" : [
+        { "id" : "f28", "to" : "f27" }
+      ]
+    }, {
+      "id" : "f27",
+      "type" : "SubProcessCall",
+      "name" : "Create Envelope",
+      "config" : {
+        "processCall" : "Processes/Envelopes:createEnvelope(com.docusign.esign.model.EnvelopeDefinition)",
+        "call" : {
+          "map" : {
+            "param.envelopeDefinition" : "in.envelopeDefinition"
+          }
+        },
+        "output" : {
+          "map" : {
+            "out" : "in",
+            "out.envelopeId" : "result.envelopeId"
+          },
+          "code" : [
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "ivy.case.customFields().stringField(DocuSignConstants.ENVELOPE_ID).set(out.envelopeId);"
+          ]
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 368, "y" : 400 },
+        "icon" : "res:/webContent/icons/docusign.png"
+      },
+      "connect" : [
+        { "id" : "f30", "to" : "f29" }
+      ]
+    }, {
+      "id" : "f29",
+      "type" : "SubProcessCall",
+      "name" : "Create Recipient view",
+      "config" : {
+        "processCall" : "Processes/Envelopes:createRecipientView(String,com.docusign.esign.model.Signer,String)",
+        "call" : {
+          "map" : {
+            "param.envelopeId" : "in.envelopeId",
+            "param.signer" : "in.signer"
+          },
+          "code" : [
+            "import com.axonivy.connector.docusign.util.SignUtils;",
+            "if (in.isRemoteSigning) {",
+            "  param.returnPage = SignUtils.getDefaultRemoteSigningReturnPage(ivy.task);",
+            "} else {",
+            "  param.returnPage = SignUtils.getDefaultIFrameSigningReturnPage(ivy.task);",
+            "}"
+          ]
+        },
+        "output" : {
+          "map" : {
+            "out" : "in",
+            "out.signingUrl" : "result.signingUrl"
+          }
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 512, "y" : 400 },
+        "icon" : "res:/webContent/icons/docusign.png"
+      },
+      "connect" : [
+        { "id" : "f31", "to" : "f2" }
+      ]
+    }, {
+      "id" : "f32",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "attachToCase(FileUploadEvent)",
+      "config" : {
+        "signature" : "attachToCase",
+        "input" : {
+          "params" : [
+            { "name" : "uploadEvent", "type" : "org.primefaces.event.FileUploadEvent", "desc" : "" }
+          ],
+          "map" : { },
+          "code" : [
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "import ch.ivyteam.ivy.workflow.document.IDocument;",
+            "import org.primefaces.model.file.UploadedFile;",
+            "for (IDocument doc :  ivy.case.documents().getAll()) {",
+            "  ivy.case.documents().delete(doc);",
+            "}",
+            "IDocument attachedDoc = ivy.case.documents().add(DocuSignConstants.UPLOADED_PREFIX + param.uploadEvent.getFile().getFileName()).write().withContentFrom(param.uploadEvent.getFile().getInputStream());",
+            "out.attachmentName = attachedDoc.getName();",
+            "out.file = attachedDoc.read().asIvyFile();"
+          ]
+        },
+        "guid" : "18E7EBE7C11850B0"
+      },
+      "visual" : {
+        "at" : { "x" : 80, "y" : 608 }
+      },
+      "connect" : [
+        { "id" : "f38", "to" : "f35" }
+      ]
+    }, {
+      "id" : "f33",
+      "type" : "HtmlDialogMethodStart",
+      "name" : "downloadIvyDoc(IDocument)",
+      "config" : {
+        "signature" : "downloadIvyDoc",
+        "input" : {
+          "params" : [
+            { "name" : "selectedDoc", "type" : "ch.ivyteam.ivy.workflow.document.IDocument", "desc" : "" }
+          ],
+          "map" : { },
+          "code" : [
+            "import com.axonivy.connector.docusign.util.DocUtils;",
+            "out.streamedContent = DocUtils.downloadIvyDoc(ivy.case, param.selectedDoc);"
+          ]
+        },
+        "result" : {
+          "params" : [
+            { "name" : "streamedContent", "type" : "org.primefaces.model.StreamedContent", "desc" : "" }
+          ],
+          "map" : {
+            "result.streamedContent" : "in.streamedContent"
+          }
+        },
+        "guid" : "18E7EBE818D836DD"
+      },
+      "visual" : {
+        "at" : { "x" : 80, "y" : 720 }
+      },
+      "connect" : [
+        { "id" : "f39", "to" : "f36" }
+      ]
+    }, {
+      "id" : "f35",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 608 }
+      }
+    }, {
+      "id" : "f36",
+      "type" : "HtmlDialogEnd",
+      "visual" : {
+        "at" : { "x" : 224, "y" : 720 }
+      }
+    }, {
+      "id" : "f2",
+      "type" : "Script",
+      "name" : "Store user input",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.axonivy.connector.docusign.connector.demo.constant.DemoConstant;",
+            "String signerId = ivy.repo.save(in.signer).getId();",
+            "ivy.task.customFields().stringField(DemoConstant.SIGNER_ID).set(signerId);",
+            "String signHereId = ivy.repo.save(in.signHere).getId();",
+            "ivy.task.customFields().stringField(DemoConstant.SIGN_HERE_ID).set(signHereId);"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 656, "y" : 400 }
+      },
+      "connect" : [
+        { "id" : "f24", "to" : "f23" }
+      ]
+    }, {
+      "id" : "f34",
+      "type" : "Script",
+      "name" : "Handle for EmbeddedSign",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "if (!in.isRemoteSigning) {",
+            "  // Update to current task",
+            "  ivy.task.customFields().stringField(DocuSignConstants.EVENT).set(DocuSignConstants.SIGNING_COMPLETE);",
+            "  ivy.task.customFields().stringField(DocuSignConstants.IVY_TOKEN).set(ivy.task.customFields().stringField(DocuSignConstants.REQUEST_IVY_TOKEN).getOrNull());",
+            "}"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 216, "y" : 272 }
+      },
+      "connect" : [
+        { "id" : "f14", "to" : "f13" }
+      ]
+    } ]
+}

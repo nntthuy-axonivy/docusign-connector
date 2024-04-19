@@ -1,0 +1,61 @@
+{
+  "$schema" : "https://json-schema.axonivy.com/process/11.2.2/process.json",
+  "id" : "18E7E1E38A4570B4",
+  "config" : {
+    "data" : "com.axonivy.connector.docusign.connector.ESignData"
+  },
+  "elements" : [ {
+      "id" : "f0",
+      "type" : "RequestStart",
+      "name" : "signatureReturn.ivp",
+      "config" : {
+        "signature" : "signatureReturn",
+        "input" : {
+          "params" : [
+            { "name" : "ivyToken", "type" : "String", "desc" : "" },
+            { "name" : "callBackTaskId", "type" : "Long", "desc" : "" },
+            { "name" : "event", "type" : "String", "desc" : "" }
+          ],
+          "map" : {
+            "out.event" : "param.event",
+            "out.ivyToken" : "param.ivyToken",
+            "out.taskId" : "param.callBackTaskId"
+          }
+        },
+        "request" : {
+          "isVisibleOnStartList" : false
+        }
+      },
+      "visual" : {
+        "at" : { "x" : 128, "y" : 64 }
+      },
+      "connect" : [
+        { "id" : "f4", "to" : "f3" }
+      ]
+    }, {
+      "id" : "f3",
+      "type" : "Script",
+      "name" : "Redirect to signin task",
+      "config" : {
+        "output" : {
+          "code" : [
+            "import com.axonivy.connector.docusign.constant.DocuSignConstants;",
+            "import ch.ivyteam.ivy.request.IHttpResponse;",
+            "import ch.ivyteam.ivy.workflow.ITask;",
+            "ITask signTask = ivy.wf.findTask(in.taskId);",
+            "signTask.customFields().stringField(DocuSignConstants.EVENT).set(in.event);",
+            "signTask.customFields().stringField(DocuSignConstants.IVY_TOKEN).set(in.ivyToken);",
+            "signTask.customFields().stringField(DocuSignConstants.HIDE).delete();",
+            "signTask.reset();",
+            "// Redirect user to signing task",
+            "IHttpResponse response = ivy.response as IHttpResponse;",
+            "response.sendRedirect(signTask.getStartLinkEmbedded().getRelative());"
+          ]
+        },
+        "sudo" : true
+      },
+      "visual" : {
+        "at" : { "x" : 288, "y" : 64 }
+      }
+    } ]
+}

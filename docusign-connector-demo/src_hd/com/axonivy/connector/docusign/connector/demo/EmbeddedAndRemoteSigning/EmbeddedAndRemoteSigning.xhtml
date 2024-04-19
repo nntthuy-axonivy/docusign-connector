@@ -1,0 +1,217 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+<h:body>
+	<ui:composition template="/layouts/frame-10.xhtml">
+		<ui:define name="title">#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/Title')}</ui:define>
+		<ui:define name="content">
+			<h2>#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/HelpText')}</h2>
+			<p>#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/HelpTextDescription')}</p>
+
+			<h:form id="form" enctype="multipart/form-data">
+				<p:messages />
+				<p:fieldset
+					legend="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/AttachmentForSign')}">
+					<p:panelGrid id="upload-document" columns="1" layout="grid"
+						styleClass="ui-panelgrid-blank">
+						<h4>#{ivy.cms.co('/Labels/UploadDocument')}</h4>
+						<p:fileUpload mode="simple" skinSimple="true"
+							label="#{ivy.cms.co('/Labels/Browse')}"
+							rendered="#{!data.isSignCompleted}"
+							allowTypes="/(\.|\/)(pdf|doc|docx|rtf)$/" auto="true"
+							listener="#{logic.attachToCase}" process="@this"
+							update="upload-document" />
+
+						<h:outputText
+							value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/UploadedDocumentLabel', [data.attachmentName])}" />
+						<h:inputHidden id="upload-file" required="true"
+							requiredMessage="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/DocumentValidateMessage')}"
+							value="#{data.attachmentName}" />
+					</p:panelGrid>
+					<p:panelGrid id="singer-info" columns="2" layout="grid"
+						styleClass="ui-panelgrid-blank"
+						columnClasses="ui-g-12 ui-md-6 ui-lg-6, ui-g-12 ui-md-6 ui-lg-6">
+						<h:panelGroup>
+							<h4>#{ivy.cms.co('/Labels/SignerInfo')}</h4>
+							<p:panelGrid columns="2" layout="grid"
+								styleClass="ui-panelgrid-blank ui-fluid"
+								columnClasses="ui-g-12 ui-md-4 ui-lg-3, ui-g-12 ui-md-8 ui-lg-9">
+								<p:outputLabel for="signer-email"
+									value="#{ivy.cms.co('/Labels/SignerEmail')}" />
+								<p:inputText id="signer-email" required="true"
+									value="#{data.signer.email}" disabled="#{data.isSignCompleted}" />
+
+								<p:outputLabel for="signer-name"
+									value="#{ivy.cms.co('/Labels/SignerName')}" />
+								<p:inputText id="signer-name" required="true"
+									value="#{data.signer.name}" disabled="#{data.isSignCompleted}" />
+							</p:panelGrid>
+						</h:panelGroup>
+
+						<h:panelGroup>
+							<h4>#{ivy.cms.co('/Labels/SignatureInfo')}</h4>
+							<p:panelGrid columns="2" layout="grid"
+								styleClass="ui-panelgrid-blank"
+								columnClasses="ui-g-12 ui-md-5 ui-lg-4, ui-g-12 ui-md-7 ui-lg-8">
+								<p:outputLabel for="anchor-text"
+									value="#{ivy.cms.co('/Labels/AnchorText')}">
+									<h:outputText id="anchor-text-info"
+										styleClass="p-pl-1 si si-information-circle" />
+									<p:tooltip for="anchor-text-info" styleClass="ui-g-6 ui-md-2 ui-lg-2"
+										value="#{ivy.cms.co('/Labels/AnchorTextHelpText')}" />
+								</p:outputLabel>
+								<p:inputText id="anchor-text" styleClass="ui-fluid"
+									value="#{data.signHere.anchorString}"
+									disabled="#{data.isSignCompleted}" />
+
+								<p:outputLabel for="anchor-x"
+									value="#{ivy.cms.co('/Labels/AnchorXOffset')}">
+									<h:outputText id="anchor-x-info"
+										styleClass="p-pl-1 si si-information-circle" />
+									<p:tooltip for="anchor-x-info" styleClass="ui-g-6 ui-md-2 ui-lg-2"
+										value="#{ivy.cms.co('/Labels/AnchorXOffsetHelpText')}" />
+								</p:outputLabel>
+								<p:inputNumber id="anchor-x"
+									value="#{data.signHere.anchorXOffset}" decimalPlaces="0"
+									disabled="#{data.isSignCompleted}" />
+
+								<p:outputLabel for="anchor-y"
+									value="#{ivy.cms.co('/Labels/AnchorYOffset')}">
+									<h:outputText id="anchor-y-info"
+										styleClass="p-pl-1 si si-information-circle" />
+									<p:tooltip for="anchor-y-info" styleClass="ui-g-6 ui-md-2 ui-lg-2"
+										value="#{ivy.cms.co('/Labels/AnchorYOffsetHelpText')}" />
+								</p:outputLabel>
+								<p:inputNumber id="anchor-y"
+									value="#{data.signHere.anchorYOffset}" decimalPlaces="0"
+									disabled="#{data.isSignCompleted}" />
+
+								<p:outputLabel for="anchor-page-number"
+									value="#{ivy.cms.co('/Labels/AnchorPage')}" />
+								<p:inputNumber id="anchor-page-number"
+									value="#{data.signHere.pageNumber}" decimalPlaces="0"
+									disabled="#{data.isSignCompleted}" />
+							</p:panelGrid>
+						</h:panelGroup>
+					</p:panelGrid>
+				</p:fieldset>
+				<br />
+				<p:fieldset id="docusign-panel"
+					legend="#{ivy.cms.co('/Labels/DocuSign')}">
+					<h:panelGrid id="signing-options"
+						rendered="#{!data.isSignCompleted}" columns="2"
+						columnClasses="ui-g-12 ui-md-6 ui-lg-6, ui-g-12 ui-md-6 ui-lg-6">
+						<h:panelGroup>
+							<p:commandButton id="remote-signing"
+								value="#{ivy.cms.co('/Labels/RemoteSigning')}"
+								styleClass="p-mb-3" process="form" update="form"
+								actionListener="#{logic.createEnvelopeAndRecipientView(true)}"
+								icon="si si-send-email" />
+							<p>
+								<b>#{ivy.cms.co('/Labels/RemoteSigning')}</b>:
+								<h:outputText value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/RemoteSigningHelpText')}" escape="false"/>
+							</p>
+						</h:panelGroup>
+						<h:panelGroup>
+							<div class="p-d-flex p-ai-center p-mb-3">
+								<p:commandButton id="embedded-signing"
+									value="#{ivy.cms.co('/Labels/EmbeddedSigning')}" process="form"
+									styleClass="p-mr-5"
+									update="form docusign-embedded-signing-popup:docusign-embedded-signing-dialog"
+									actionListener="#{logic.createEnvelopeAndRecipientView(false)}"
+									oncomplete="if(!args.validationFailed) PF('docusign-embedded-signing-dialog').show()"
+									icon="si si-touchpad-finger" />
+								<span class="p-d-flex p-ai-center">
+									<p:outputLabel for="using-iframe" value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedAndRemoteSigning/UsingIFrame')}" styleClass="p-mr-2">
+										<h:outputText id="using-iframe-info"
+											styleClass="p-pl-1 si si-information-circle" />
+										<p:tooltip for="using-iframe-info"
+											value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/UseIFrameHelpText')}"
+											escape="false" styleClass="ui-g-10 ui-md-4 ui-lg-4" />
+									</p:outputLabel>
+									<p:toggleSwitch id="using-iframe" value="#{data.isUseIFrame}" />
+								</span>
+							</div>
+							<p>
+								<b>#{ivy.cms.co('/Labels/EmbeddedSigning')}</b>:
+								<h:outputText value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/EmbeddedSigningHelpText')}" escape="false"/>
+							</p>
+						</h:panelGroup>
+					</h:panelGrid>
+					<br />
+					<h:panelGroup
+						rendered="#{data.isRemoteSigning and !data.isSignCompleted}">
+						<h4>#{ivy.cms.co('/Labels/SignDocument')}</h4>
+						<p:commandLink onclick="openSigningPage()">
+							<i class="si si-send-email" />
+							<span>#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/PleaseClickHere',
+								[data.envelopeId])}</span>
+						</p:commandLink>
+					</h:panelGroup>
+					<p:dataTable rendered="#{data.isSignCompleted}"
+						value="#{data.signedIvyDocs}" var="doc" lazy="false">
+						<p:column headerText="#{ivy.cms.co('/Labels/DocumentName')}">
+							<p:commandLink value="#{doc.name}" ajax="false" immediate="true"
+								process="@none" icon="pi pi-arrow-down" styleClass="mr-2">
+								<p:fileDownload value="#{logic.downloadIvyDoc(doc)}" />
+							</p:commandLink>
+						</p:column>
+					</p:dataTable>
+				</p:fieldset>
+				<br />
+				<div class="command-btns">
+					<p:commandLink id="cancel" rendered="#{!data.isSignCompleted}"
+						actionListener="#{ivyWorkflowView.cancel()}" process="@this"
+						value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedSigning/Cancel')}" />
+					<p:commandButton rendered="#{data.isSignCompleted}"
+						value="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedAndRemoteSigning/DoneProcess')}"
+						actionListener="#{logic.close}" process="@this" />
+				</div>
+
+				<c:if test="#{data.isRemoteSigning}">
+					<script>
+						//<![CDATA[
+						function openSigningPage() {
+							window.location = '#{ivy.html.applicationHomeRef()}';
+							window.open('#{data.signingUrl}', '_blank').focus();
+						}
+						//]]>
+					</script>
+				</c:if>
+			</h:form>
+
+			<p:remoteCommand name="listenerOnSigningComplete"
+				actionListener="#{logic.downloadSignedDocs()}"
+				process="@this" partialSubmit="true"
+				onstart="PF('download-document-status-dialog').show();"
+				oncomplete="PF('download-document-status-dialog').hide();"
+				update="@this form:docusign-panel @(form)" global="false"/>
+
+			<ic:com.axonivy.connector.docusign.connector.components.DocuSignPopup
+				id="docusign-embedded-signing-popup" signingURL="#{data.signingUrl}"
+				useIFrame="#{data.isUseIFrame}" documentName="#{data.file.name}"
+				callbackActionOnSigningComplete="listenerOnSigningComplete()" />
+
+			<p:dialog widgetVar="download-document-status-dialog" modal="true" draggable="false"
+				closable="false" resizable="false" showHeader="false" blockScroll="true" fitViewport="true">
+				<div class="p-text-center">
+					<p class="p-col-12">#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/demo/EmbeddedAndRemoteSigning/DownloadingMessage')}...</p>
+					<i class="pi pi-spin pi-spinner loading-icon" aria-hidden="true" />
+				</div>
+			</p:dialog>
+
+			<script type="text/javascript">
+				window.isWorkingOnATask = true;
+				window.isHideTaskName = false;
+				window.isHideTaskAction = true;
+			</script>
+		</ui:define>
+	</ui:composition>
+</h:body>
+
+</html>

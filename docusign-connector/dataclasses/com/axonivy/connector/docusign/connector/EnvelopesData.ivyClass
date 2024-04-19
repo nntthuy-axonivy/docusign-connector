@@ -1,0 +1,11 @@
+EnvelopesData #class
+com.axonivy.connector.docusign.connector #namespace
+envelopeDefinition com.docusign.esign.model.EnvelopeDefinition #field
+envelopeId String #field
+signer com.docusign.esign.model.Signer #field
+signingUrl String #field
+returnPage String #field
+documents java.util.List<com.docusign.esign.model.EnvelopeDocument> #field
+signedDocumentId String #field
+signedDocumentEntity com.axonivy.connector.docusign.bo.DownloadResult #field
+error ch.ivyteam.ivy.bpm.error.BpmError #field

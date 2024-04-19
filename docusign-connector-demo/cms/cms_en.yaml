@@ -1,0 +1,55 @@
+Dialogs:
+  com:
+    axonivy:
+      connector:
+        docusign:
+          connector:
+            demo:
+              EmbeddedAndRemoteSigning:
+                DoneProcess: Done process
+                DownloadingMessage: Downloading your signed documents
+                UsingIFrame: Using IFrame
+              EmbeddedSigning:
+                AttachmentForSign: Attachment for signing
+                Cancel: Cancel
+                DocumentValidateMessage: 'Document: Value is required.'
+                EmbeddedSigningHelpText: |-
+                  <p>By embedding DocuSign functionality in your app, you can use its UI to initiate the signing process and enable your users to send or sign documents directly within your app, avoiding the need to switch contexts to email.</p>
+                  <p>Per default it uses <a href="https://developers.docusign.com/docs/esign-rest-api/esign101/concepts/embedding/" target="_blank">DocuSign JS</a> plugin.</p>
+                HelpText: What we have in this section
+                HelpTextDescription: DocuSign transactions can be initiated either remotely, via an email notification that directs signers to view or sign their documents through the DocuSign website, or performed directly within an application using embedded sending and embedded signing.
+                MailSubject: Connecting Axon Ivy with DocuSign
+                PleaseClickHere: 'Your request is submitted to DocuSign under the envelope id #{0}, please click here to sign it via DocuSign website.'
+                RemoteSigningHelpText: |-
+                  <p>This action demonstrates how to send a signature request via an email, also known as a remote signature request or remote signing. The email will contain a signing link that the recipient can use to open and electronically sign a document using the DocuSign mobile app or the DocuSign website.</p>
+                  <p>After signing is complete, the recipient receives a carbon copy (CC) of the email that includes all of the completed and signed documents.</p>
+                Title: Embedded and Remote Signing demo
+                UploadADocument: Upload a document to be signed
+                UploadedDocumentLabel: 'Document (pdf, doc, docx, rtf) * : {0}'
+                UseIFrameHelpText: |-
+                  <p>To use a native iframe tag for signing: it seems to be a simple and straightforward way to display the signing experience. However, using iframes can also lead to a web-page-within-web-page like user experience which can feel unintuitive. Additionally, some features such as Identity Verification are not compatible with iframes.</p>
+                  <a href="https://www.docusign.com/blog/developers/the-problems-iframes" target="_blank">Visit here to see more</a>
+Labels:
+  AnchorPage: Anchor page number
+  AnchorText: Anchor text
+  AnchorTextHelpText: Anchor text enables you to place signature at every location where a specified text string
+  AnchorXOffset: Anchor X-Offset
+  AnchorXOffsetHelpText: The positions in relation to the string instances can be set by providing x and y offsets
+  AnchorYOffset: Anchor Y-Offset
+  AnchorYOffsetHelpText: The positions in relation to the string instances can be set by providing x and y offsets
+  Browse: Browse
+  DocuSign: DocuSign
+  DocumentName: Document name
+  EmbeddedSigning: Embedded signing
+  RemoteSigning: Remote signing
+  SignDocument: Sign document
+  SignatureInfo: Signature information
+  SignerEmail: Signer email
+  SignerInfo: Signer information
+  SignerName: Signer name
+  UploadDocument: Upload document
+Processes:
+  DemoESign:
+    EmbeddedAndRemoteSiging:
+      description: DocuSign transactions can be initiated either remotely, via an email notification that directs signers to view or sign their documents through the DocuSign website, or performed directly within an application using embedded sending and embedded signing.
+      name: 3. Demo for Embedded and Remote signing function

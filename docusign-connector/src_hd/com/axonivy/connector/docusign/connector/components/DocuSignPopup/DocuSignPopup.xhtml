@@ -1,0 +1,78 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:f="http://xmlns.jcp.org/jsf/core"
+	xmlns:h="http://xmlns.jcp.org/jsf/html"
+	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+	xmlns:cc="http://xmlns.jcp.org/jsf/composite"
+	xmlns:ic="http://ivyteam.ch/jsf/component"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+<cc:interface componentType="IvyComponent">
+	<cc:attribute name="useIFrame" shortDescription="To embedded your url inside a native iframe tag or use DocuSign JS plugin"/>
+	<cc:attribute name="signingURL" required="true" shortDescription="The recipient view url that return by accounts/placeholder/envelopes/{envelopeId}/views/recipient endpoint"/>
+	<cc:attribute name="documentName" shortDescription="To display on the header-text of signing popup"/>
+	<cc:attribute name="callbackActionOnSigningComplete" shortDescription="A client side callback to execute after signing requests completed succesfully."/>
+</cc:interface>
+
+<cc:implementation>
+	<script src='https://js.docusign.com/bundle.js'></script>
+	<h:outputStylesheet name="/styles/docusign.css" />
+
+	<p:remoteCommand name="closeSigningDialog" process="@this"
+		partialSubmit="true" immediate="true" update="@this"
+		onstart="PF('docusign-embedded-signing-dialog').hide();"
+		oncomplete="#{cc.attrs.callbackActionOnSigningComplete}" />
+
+	<p:dialog id="docusign-embedded-signing-dialog"
+		widgetVar="docusign-embedded-signing-dialog" modal="true"
+		fitViewport="true" dynamic="true" blockScroll="true"
+		maximizable="#{cc.attrs.useIFrame}"
+		header="#{ivy.cms.co('/Dialogs/com/axonivy/connector/docusign/connector/components/DocuSignPopup/PleaseSignDocument', [cc.attrs.documentName])}"
+		width="80%" minHeight="500">
+		<h:panelGroup id="docusign-embedded-signing" layout="block">
+			<c:if test="#{cc.attrs.useIFrame}">
+				<iframe id="docusign-embeded" src="#{cc.attrs.signingURL}"
+					class="task-frame signing-iframe"
+					allow="midi 'src'; geolocation 'src'; microphone 'src'; camera 'src'; display-capture 'src'; encrypted-media 'src';" />
+			</c:if>
+
+			<c:if test="#{empty cc.attrs.useIFrame or !cc.attrs.useIFrame}">
+				<div class="docusign-agreement" id="agreement" />
+				<script>
+					//<![CDATA[
+						window.DocuSign.loadDocuSign('#{data.integrationKey}').then((docusign) => {
+							const signing = docusign.signing({
+								url: '#{cc.attrs.signingURL}',
+								displayFormat: 'focused',
+								/** High-level variables that mirror our existing branding APIs. */
+								style: {
+									branding: {
+										primaryButton: {
+										backgroundColor: 'var(--ivy-primary-color, #006f94)',
+										color: 'var(--ivy-primary-text-color, #ffffff)',
+										}
+									}
+								}
+							});
+
+							/** Event handlers **/
+							signing.on('sessionEnd', (event) => {
+								/** The event here denotes what caused the sessionEnd to trigger, such as signing_complete, ttl_expired etc../ */
+								console.log('sessionend', event);
+								if (event.sessionEndType === 'signing_complete') {
+									closeSigningDialog();
+								}
+							});
+
+							signing.mount('#agreement');
+						}).catch((ex) => {
+							// Any configuration or API limits will be caught here
+						});
+					//]]>
+				</script>
+			</c:if>
+		</h:panelGroup>
+	</p:dialog>
+</cc:implementation>
+
+</html>

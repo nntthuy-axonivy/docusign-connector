@@ -1,0 +1,7 @@
+ESignData #class
+com.axonivy.connector.docusign.connector #namespace
+taskId Long #field
+ivyToken String #field
+event String #field
+returnPage String #field
+error ch.ivyteam.ivy.bpm.error.BpmError #field

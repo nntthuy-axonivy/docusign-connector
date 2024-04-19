@@ -1,0 +1,30 @@
+EmbeddedAndRemoteSigningData #class
+com.axonivy.connector.docusign.connector.demo.EmbeddedAndRemoteSigning #namespace
+signingUrl String #field
+signingUrl PERSISTENT #fieldModifier
+file File #field
+file PERSISTENT #fieldModifier
+envelopeId String #field
+envelopeId PERSISTENT #fieldModifier
+signer com.docusign.esign.model.Signer #field
+signer PERSISTENT #fieldModifier
+documents java.util.List<com.docusign.esign.model.EnvelopeDocument> #field
+documents PERSISTENT #fieldModifier
+isRemoteSigning Boolean #field
+isRemoteSigning PERSISTENT #fieldModifier
+isSignCompleted Boolean #field
+isSignCompleted PERSISTENT #fieldModifier
+envelopeDefinition com.docusign.esign.model.EnvelopeDefinition #field
+envelopeDefinition PERSISTENT #fieldModifier
+signHere com.docusign.esign.model.SignHere #field
+signHere PERSISTENT #fieldModifier
+attachmentName String #field
+attachmentName PERSISTENT #fieldModifier
+signedDoc com.docusign.esign.model.EnvelopeDocument #field
+signedDoc PERSISTENT #fieldModifier
+signedIvyDocs java.util.List<ch.ivyteam.ivy.workflow.document.IDocument> #field
+signedIvyDocs PERSISTENT #fieldModifier
+streamedContent org.primefaces.model.StreamedContent #field
+streamedContent PERSISTENT #fieldModifier
+isUseIFrame Boolean #field
+isUseIFrame PERSISTENT #fieldModifier
