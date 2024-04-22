@@ -7,7 +7,7 @@
   <packaging>iar</packaging>
   <properties>
     <project.build.plugin.version>11.2.0</project.build.plugin.version>
-    <unit.tester.version>11.2.0-SNAPSHOT</unit.tester.version>
+    <unit.tester.version>11.2.1</unit.tester.version>
   </properties>
   <pluginRepositories>
     <pluginRepository>
